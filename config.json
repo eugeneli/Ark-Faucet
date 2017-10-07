@@ -1,0 +1,7 @@
+{
+	"database": {
+		"username": "user",
+		"password": "pass"
+	},
+	"payPerClick": 5
+}

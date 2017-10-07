@@ -4,34 +4,39 @@ var express = require("express");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser")
 var mysql = require("mysql");
+var nconf = require("nconf");
 var app = express();
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.disable("x-powered-by");
 
-var passphrase;
-var args = process.argv.slice(2);
-if(args.length == 1)
-    passphrase = args[0];
-else
+nconf.argv().file("config.json");
+const DB_USERNAME = nconf.get("database:username");
+const DB_PASSWORD = nconf.get("database:password");
+
+const PAY_PER_CLICK = nconf.get("payPerClick");
+const RECAPTCHA = nconf.get("");
+
+const PASSPHRASE = nconf.argv().get("pass");
+
+if(!PASSPHRASE)
 {
-    console.log("Enter passphrase");
+    console.log("Please enter the faucet's passphrase");
     process.exit(1);
 }
 
-PUB_KEY = ark.crypto.getKeys(passphrase).publicKey;
+PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
 FAUCET_ADDRESS = ark.crypto.getAddress(PUB_KEY);
 
 arkApi.init("main");
-arkApi.setPreferredNode("108.61.23.81");
 
 //Init MySQL
 var pool = mysql.createPool({
     connectionLimit : 100,
     host: "localhost",
-    user: process.env.BIZFAUCET_DB_USERNAME,
-    password: process.env.BIZFAUCET_DB_PASSWORD,
-    database: "BizFaucet",
+    user: process.env.FAUCET_DB_USERNAME,
+    password: process.env.FAUCET_DB_PASSWORD,
+    database: "ArkFaucet",
     debug:  false
 });
 
