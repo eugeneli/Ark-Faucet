@@ -1,0 +1,29 @@
+{
+  "name": "ArkFaucet",
+  "version": "1.0.0",
+  "description": "Ark Faucet",
+  "main": "index.js",
+  "dependencies": {
+    "ark-api": "github:eugeneli/arkjs-wrapper",
+    "arkjs": "^0.2.1",
+    "bcrypt": "^1.0.2",
+    "bignumber.js": "^4.0.2",
+    "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.3",
+    "moment": "^2.18.1",
+    "mysql": "^2.13.0",
+    "request": "^2.81.0",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eugeneli/Ark-Faucet.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
