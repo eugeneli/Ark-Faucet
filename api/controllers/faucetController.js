@@ -5,7 +5,7 @@ var util = require("../util");
 
 exports.useFaucet = (req, res) => {
     recaptcha.verify(req, (err, data) => {
-        if(!error)
+        if(!err)
         {
 
         }

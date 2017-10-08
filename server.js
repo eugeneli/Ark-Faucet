@@ -13,14 +13,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.disable("x-powered-by");
 
-arkApi.init("main");
-
 nconf.argv().file("config.json");
+const PORT = nconf.get("port");
+const PAY_PER_CLICK = nconf.get("payPerClick");
+const COOLDOWN = nconf.get("cooldown");
+
 const DB_USERNAME = nconf.get("database:username");
 const DB_PASSWORD = nconf.get("database:password");
-
-const PAY_PER_CLICK = nconf.get("payPerClick");
-
 const PASSPHRASE = nconf.argv().get("pass");
 
 if(!PASSPHRASE)
@@ -29,10 +28,13 @@ if(!PASSPHRASE)
     process.exit(1);
 }
 
-PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
-FAUCET_ADDRESS = ark.crypto.getAddress(PUB_KEY);
+const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
+const FAUCET_ADDRESS = ark.crypto.getAddress(PUB_KEY);
 
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
+
+arkApi.setPreferredNode(nconf.get("node"));
+arkApi.init("main");
 
 //Init MySQL
 var pool = mysql.createPool({
@@ -60,17 +62,17 @@ var startServer = () => {
     routes(app);
 
     app.all("/*", (req, res, next) => {
-        //res.header("Access-Control-Allow-Origin", "*");
-        //res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-        //res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Auth-Token");
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Auth-Token");
         if(req.method == "OPTIONS")
             res.status(200).end();
         else
             next();
     });
 
-    app.listen(80, () => {
-        console.log("faucet backend server started on port 80");
+    app.listen(PORT, () => {
+        console.log(`faucet backend server started on port ${PORT}`);
     });
 }
 

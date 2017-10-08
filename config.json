@@ -1,4 +1,8 @@
 {
+    "node": "5.39.9.240",
+    "port": 80,
+    "payPerClick": 0.05,
+    "cooldown": 3600,
     "database": {
         "username": "user",
         "password": "pass"
@@ -6,6 +10,5 @@
     "recaptcha": {
         "siteKey": "",
         "secretKey": ""
-    },
-    "payPerClick": 5
+    }
 }
