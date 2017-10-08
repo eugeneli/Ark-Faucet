@@ -1,7 +1,11 @@
 {
-	"database": {
-		"username": "user",
-		"password": "pass"
-	},
-	"payPerClick": 5
+    "database": {
+        "username": "user",
+        "password": "pass"
+    },
+    "recaptcha": {
+        "siteKey": "",
+        "secretKey": ""
+    },
+    "payPerClick": 5
 }

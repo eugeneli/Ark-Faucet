@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
+            function onSubmit(captchaResp) {
+                $.post("http://localhost/api/captcha", {"g-recaptcha-response": captchaResp}, (resp) => {
+                    console.log(resp);
+                })
+            }
+        </script>
+    </head>
+    <body>
+        <div id="captcha">
+            <script src="//www.google.com/recaptcha/api.js" async defer></script>
+            <div class="g-recaptcha" data-sitekey="6LfTmjMUAAAAADFuOYk3HeZKjxqoX5Kn2eSD1b5U" data-callback="onSubmit"></div>
+        </div>
+        <script type="text/javascript">
+            $.get("http://localhost/api/captcha", (data) => {
+                //$("#captcha").html(data);
+            });
+        </script>
+    </body>
+</html>

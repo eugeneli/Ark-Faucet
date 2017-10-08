@@ -5,17 +5,21 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser")
 var mysql = require("mysql");
 var nconf = require("nconf");
+var Recaptcha = require("express-recaptcha");
 var app = express();
+app.use(express.static("./frontend"));
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.disable("x-powered-by");
+
+arkApi.init("main");
 
 nconf.argv().file("config.json");
 const DB_USERNAME = nconf.get("database:username");
 const DB_PASSWORD = nconf.get("database:password");
 
 const PAY_PER_CLICK = nconf.get("payPerClick");
-const RECAPTCHA = nconf.get("");
 
 const PASSPHRASE = nconf.argv().get("pass");
 
@@ -28,14 +32,14 @@ if(!PASSPHRASE)
 PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
 FAUCET_ADDRESS = ark.crypto.getAddress(PUB_KEY);
 
-arkApi.init("main");
+recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
 
 //Init MySQL
 var pool = mysql.createPool({
     connectionLimit : 100,
     host: "localhost",
-    user: process.env.FAUCET_DB_USERNAME,
-    password: process.env.FAUCET_DB_PASSWORD,
+    user: DB_USERNAME,
+    password: DB_PASSWORD,
     database: "ArkFaucet",
     debug:  false
 });
@@ -56,17 +60,17 @@ var startServer = () => {
     routes(app);
 
     app.all("/*", (req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Auth-Token");
+        //res.header("Access-Control-Allow-Origin", "*");
+        //res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+        //res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Auth-Token");
         if(req.method == "OPTIONS")
             res.status(200).end();
         else
             next();
     });
 
-    app.listen(8080, () => {
-        console.log("faucet backend server started on port 8080");
+    app.listen(80, () => {
+        console.log("faucet backend server started on port 80");
     });
 }
 
