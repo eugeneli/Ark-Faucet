@@ -2,13 +2,11 @@ CREATE SCHEMA IF NOT EXISTS `ArkFaucet` DEFAULT CHARACTER SET utf8 ;
 USE `ArkFaucet` ;
 
 CREATE TABLE IF NOT EXISTS `ArkFaucet`.`Unpaid_Balances` (
-  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `address` VARCHAR(34) NOT NULL,
   `pending` DECIMAL(65, 8) NOT NULL,
-  PRIMARY KEY (`id`));
+  PRIMARY KEY (`address`));
 
 CREATE TABLE IF NOT EXISTS `ArkFaucet`.`Roll_Times` (
-  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `IP` VARCHAR(15) NOT NULL,
   `lastRoll` DATETIME,
-  PRIMARY KEY (`id`));
+  PRIMARY KEY (`IP`));

@@ -1,3 +1,4 @@
+var fs = require("fs");
 var arkApi = require("ark-api");
 var ark = require("arkjs");
 var express = require("express");
@@ -28,9 +29,6 @@ if(!PASSPHRASE)
     process.exit(1);
 }
 
-const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
-const FAUCET_ADDRESS = ark.crypto.getAddress(PUB_KEY);
-
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
 
 arkApi.setPreferredNode(nconf.get("node"));
@@ -57,6 +55,27 @@ exports.getConnection = () => {
     }).catch((err) => console.log(err));
 };
 
+var getFaucetAccountInfo = () => {
+    return new Promise((resolve, reject) => {
+        let pubKey = ark.crypto.getKeys(PASSPHRASE).publicKey;
+        let faucetAddr = ark.crypto.getAddress(pubKey);
+
+        arkApi.getBalance(faucetAddr, (err, succ, resp) => {
+            if(!err)
+            {
+                var info = {
+                    address: faucetAddr,
+                    balance: resp.balance / 100000000,
+                };
+
+                resolve(info);
+            }
+            else
+                reject(err);
+        });
+    });
+};
+
 var startServer = () => {
     var routes = require("./api/routes/routes");
     routes(app);
@@ -72,7 +91,16 @@ var startServer = () => {
     });
 
     app.listen(PORT, () => {
-        console.log(`faucet backend server started on port ${PORT}`);
+        console.log(fs.readFileSync("art.txt", "utf8"));
+        console.log(`Faucet server started on port ${PORT}`);
+        getFaucetAccountInfo().then((info) => {
+            console.log("=====");
+            console.log(`Address: ${info.address}`);
+            console.log(`Balance: ${info.balance} ARK`);
+            console.log(`Pay Per Click: ${PAY_PER_CLICK} ARK`);
+            console.log(`Cooldown: ${COOLDOWN} seconds`);
+            console.log("=====");
+        });
     });
 }
 
