@@ -2,22 +2,98 @@
 <html lang="en">
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="index.css" rel="stylesheet">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script>
-            function onSubmit(captchaResp) {
-                $.post("http://localhost/api/captcha", {"address": "wow", "g-recaptcha-response": captchaResp}, (resp) => {
+            var onCaptchaSolve = (captchaResp) => {
+                var addr = $("#address").val();
+                $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
                     console.log(resp);
                 })
             }
         </script>
     </head>
     <body>
-        <div id="captcha">
-            <script src="//www.google.com/recaptcha/api.js" async defer></script>
-            <div class="g-recaptcha" data-sitekey="6LfTmjMUAAAAADFuOYk3HeZKjxqoX5Kn2eSD1b5U" data-callback="onSubmit"></div>
+        <nav class="navbar navbar-default" id="header">
+            <img class="logo" src="img/logo.png">
+        </nav>
+        <div id="headerBar">
+            <div id="emptyBar"></div>
+            <div id="headerMsg">Made with <span class="glyphicon glyphicon-heart"></span> by <a href="https://classicdelegate.biz">biz_classic</a> with funding from the <a href="https://arkcommunityfund.com">ACF</a></div>
+        </div>
+
+        <div class="container">
+            <div class="panel panel-default">
+                <div class="panel-heading">Faucet Info</div>
+                <div class="row panel-body">
+                    <div class="col-md-4"><b>Address:</b> <span id="addr"></span></div>
+                    <div class="col-md-4"><b>Pay Per Click:</b> <span id="ppc"></span></div>
+                    <div class="col-md-4"><b>Cooldown:</b> <span id="cooldown"></span></div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3>Enter your Ark address below and solve the captcha to collect from the faucet!</h3>
+                    <div class="form-group" id="addressContainer">
+                        <label for="address">Ark Address</label>
+                        <input type="text" class="form-control" id="address" placeholder="Address">
+                    </div>
+                    <br />
+                    <div id="submitContainer" class="hidden">
+                        <div id="captcha">
+                            <script src="//www.google.com/recaptcha/api.js" async defer></script>
+                            <div class="g-recaptcha" data-sitekey="6LfTmjMUAAAAADFuOYk3HeZKjxqoX5Kn2eSD1b5U" data-callback="onCaptchaSolve"></div>
+                        </div>
+                        <br />
+                        <button type="button" class="btn btn-info" id="submit">SUBMIT</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <script type="text/javascript">
-            $.get("http://localhost/api/captcha", (data) => {
-                //$("#captcha").html(data);
+            var getRemainingTime = (seconds) => {
+                var minutes = Math.floor(seconds / 60);
+                var seconds = seconds - (minutes * 60);
+
+                return { minutes: minutes, seconds: seconds };
+            }
+
+            $.get("api/faucet", (info) => {
+                $("#addr").html(info.address);
+                $("#ppc").html(info.payPerClick.toFixed(8) + " ARK");
+                $("#cooldown").html(info.cooldown + " seconds");
+
+                $.get("api/faucet/status", (data) => {
+                    var submitContainer = $("#submitContainer");
+                    if(!data.canRoll)
+                    {
+                        var timeDiff = data.timeDiff;
+                        var remainingCooldown = info.cooldown - timeDiff;
+
+                        submitContainer.removeClass("hidden");
+                        submitContainer.empty();
+                        var cooldownTimer = setInterval(() => {
+                            remainingCooldown--;
+
+                            var minSecs = getRemainingTime(remainingCooldown);
+
+                            submitContainer.html(`<b>${minSecs.minutes} minutes ${minSecs.seconds} seconds until you can play again</b>`);
+                            if(remainingCooldown <= 0)
+                            {
+                                clearInterval(downloadTimer);
+                                location.reload();
+                            }
+                        },1000);
+                    }
+                    else
+                        submitContainer.removeClass("hidden");
+                });
+            });
+
+            $.get("api/faucet/logs", (data) => {
+                console.log(data);
             });
         </script>
     </body>

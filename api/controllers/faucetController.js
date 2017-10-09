@@ -17,13 +17,21 @@ var createLog = (IP, address, amount, rollTime) => {
     return log;
 };
 
+var timeDiff = (now, lastRollTime, cooldown) => {
+    var diff = now.diff(lastRollTime, "seconds");
+    return { canRoll: diff > cooldown, diff: diff };
+};
+
 exports.useFaucet = (req, res) => {
+    var address = req.body.address;
+    if(!util.isAddress(address))
+        return util.reject(res, "400", "Invalid Ark address");
+
     recaptcha.verify(req, (err, data) => {
         if(!err)
         {
             var IP = req.connection.remoteAddress;
             var now = moment();
-            var address = req.body.address;
 
             arkApi.getBalance(FAUCET_ADDR, (err, succ, resp) => {
                 if(!err)
@@ -38,13 +46,8 @@ exports.useFaucet = (req, res) => {
 
                         //Check if cooldown is up
                         if(rollTimeRow.length > 0)
-                        {
-                            var lastRollTime = moment(rollTimeRow[0].lastRoll);
-                            var diff = now.diff(lastRollTime, "seconds");
-                            console.log(diff)
-                            if(diff < COOLDOWN)
-                                return util.reject(res, "403", "Try again later")
-                        }
+                            if(!timeDiff(now, moment(rollTimeRow[0].lastRoll), COOLDOWN).canRoll)
+                                return util.reject(res, "403", "Try again later");
 
                         //Make sure we don't become insolvent
                         //faucetBalance = 10000;
@@ -70,4 +73,35 @@ exports.useFaucet = (req, res) => {
         else
             util.reject(res, "403", "reCaptcha verification failed");
     })
+};
+
+exports.getStatus = (req, res) => {
+    var IP = req.connection.remoteAddress;
+    repo.getRollTimeByIp(IP).then((resp) => {
+        if(resp.length == 0)
+            return res.send({canRoll: true});
+
+        var lastRollTime = moment(resp[0].lastRoll);
+        var timeDifference = timeDiff(moment(), lastRollTime, COOLDOWN);
+        if(timeDifference.canRoll)
+            return res.send({canRoll: true});
+        else
+            return res.send({canRoll: false, timeDiff: timeDifference.diff});
+    });
+};
+
+exports.getInfo = (req, res) => {
+    var faucetInfo = {
+        address: FAUCET_ADDR,
+        payPerClick: PAY_PER_CLICK,
+        cooldown: COOLDOWN
+    };
+
+    res.send(faucetInfo);
+};
+
+exports.getRecentLogs = (req, res) => {
+    logRepo.getRecentLogs(10).then((logs) => {
+        res.send(logs);
+    });
 };

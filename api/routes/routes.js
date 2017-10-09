@@ -3,6 +3,13 @@ module.exports = function(app) {
     var faucet = require("../controllers/faucetController");
 
     //Faucet
-    app.route("/api/captcha")
+    app.route("/api/faucet")
+        .get(faucet.getInfo)
         .post(faucet.useFaucet);
+
+    app.route("/api/faucet/status")
+        .get(faucet.getStatus);
+
+    app.route("/api/faucet/logs")
+        .get(faucet.getRecentLogs);
 };
