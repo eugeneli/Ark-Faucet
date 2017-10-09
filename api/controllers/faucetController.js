@@ -107,3 +107,7 @@ exports.getRecentLogs = (req, res) => {
         res.send(logs);
     });
 };
+
+exports.getCaptcha = (req, res) => {
+    res.send({ captcha: recaptcha.render() });
+};

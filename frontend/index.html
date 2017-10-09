@@ -45,8 +45,6 @@
                     <br />
                     <div id="submitContainer" class="hidden">
                         <div id="captcha">
-                            <script src="//www.google.com/recaptcha/api.js" async defer></script>
-                            <div class="g-recaptcha" data-sitekey="6LfTmjMUAAAAADFuOYk3HeZKjxqoX5Kn2eSD1b5U" data-callback="onCaptchaSolve"></div>
                         </div>
                         <br />
                         <button type="button" class="btn btn-info" id="submit">SUBMIT</button>
@@ -80,6 +78,7 @@
             var submitContainer = $("#submitContainer");
             var success = $("#success");
             var error = $("#error");
+            var captcha = $("#captcha");
 
             $.get("api/faucet", (info) => {
                 $("#addr").html(info.address);
@@ -102,15 +101,31 @@
                 });
 
                 $("#submit").click(() => {
+                    if(addr == null || captchaResp == null)
+                    {
+                        error.html("Please enter a valid Ark address and solve the captcha");
+                        error.removeClass("hidden");
+                    }
+
                     $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
-                        $("#success").html(`${info.payPerClick} Ark added to your account!`);
-                        $("#success").removeClass("hidden");
+                        success.html(`${info.payPerClick} Ark added to your account!`);
+                        success.removeClass("hidden");
                         startCountdown(submitContainer, info.cooldown);
                     }).fail((resp) => {
-                        $("#error").html(resp.responseText);
-                        $("#error").removeClass("hidden");
+                        error.html(resp.responseText);
+                        error.removeClass("hidden");
                     });
                 });
+            });
+
+            $.get("api/faucet/captcha", (resp) => {
+                var captchaHtml = $(resp.captcha);
+                var element = captchaHtml.find("div.g-recaptcha");
+                element.data("callback", "onCaptchaSolve");
+
+                console.log(element);
+
+                captcha.html(captchaHtml);
             });
 
             $.get("api/faucet/logs", (data) => {
