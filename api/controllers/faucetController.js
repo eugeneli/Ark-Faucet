@@ -44,15 +44,17 @@ exports.useFaucet = (req, res) => {
                         var totalUnpaid = resp[0].sum;
                         var rollTimeRow = resp[1];
 
+                        var timeDifference = timeDiff(now, moment(rollTimeRow[0].lastRoll), COOLDOWN);
+
                         //Check if cooldown is up
                         if(rollTimeRow.length > 0)
-                            if(!timeDiff(now, moment(rollTimeRow[0].lastRoll), COOLDOWN).canRoll)
+                            if(!timeDifference.canRoll)
                                 return util.reject(res, "403", "Try again later");
 
                         //Make sure we don't become insolvent
                         //faucetBalance = 10000;
-                        if(totalUnpaid + PAY_PER_CLICK >= faucetBalance)
-                            return util.reject(res, "403", "Faucet is empty, please check back later");
+                        //if(totalUnpaid + PAY_PER_CLICK >= faucetBalance)
+                            //return util.reject(res, "403", "Faucet is empty, please check back later");
 
                         //Checks passed, credit them now
                         var updatePendingP = repo.updateUnpaidBalance(address, PAY_PER_CLICK);
@@ -61,7 +63,7 @@ exports.useFaucet = (req, res) => {
                         logRepo.addLog(createLog(IP, address, PAY_PER_CLICK, now.toDate()));
                         Promise.all([updatePendingP, updateRollTimeP]).then(() => {
                             return res.send({
-                                rollTime: now.toDate()
+                                timeDiff: timeDifference.diff
                             });
                         });
                     });

@@ -6,11 +6,11 @@
         <link href="index.css" rel="stylesheet">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script>
-            var onCaptchaSolve = (captchaResp) => {
-                var addr = $("#address").val();
-                $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
-                    console.log(resp);
-                })
+            var addr;
+            var captchaResp;
+            var onCaptchaSolve = (resp) => {
+                addr = $("#address").val();
+                captchaResp = resp;
             }
         </script>
     </head>
@@ -35,6 +35,8 @@
 
             <div class="panel panel-default">
                 <div class="panel-body">
+                    <div class="alert alert-success hidden" role="alert" id="success"></div>
+                    <div class="alert alert-danger hidden" role="alert" id="error"></div>
                     <h3>Enter your Ark address below and solve the captcha to collect from the faucet!</h3>
                     <div class="form-group" id="addressContainer">
                         <label for="address">Ark Address</label>
@@ -60,13 +62,31 @@
                 return { minutes: minutes, seconds: seconds };
             }
 
+            var startCountdown = (container, remainingCooldown) => {
+                var cooldownTimer = setInterval(() => {
+                    remainingCooldown--;
+
+                    var minSecs = getRemainingTime(remainingCooldown);
+
+                    container.html(`<b>${minSecs.minutes} minutes ${minSecs.seconds} seconds until you can play again</b>`);
+                    if(remainingCooldown <= 0)
+                    {
+                        clearInterval(cooldownTimer);
+                        //location.reload();
+                    }
+                }, 1000);
+            }
+
+            var submitContainer = $("#submitContainer");
+            var success = $("#success");
+            var error = $("#error");
+
             $.get("api/faucet", (info) => {
                 $("#addr").html(info.address);
                 $("#ppc").html(info.payPerClick.toFixed(8) + " ARK");
                 $("#cooldown").html(info.cooldown + " seconds");
 
                 $.get("api/faucet/status", (data) => {
-                    var submitContainer = $("#submitContainer");
                     if(!data.canRoll)
                     {
                         var timeDiff = data.timeDiff;
@@ -74,21 +94,22 @@
 
                         submitContainer.removeClass("hidden");
                         submitContainer.empty();
-                        var cooldownTimer = setInterval(() => {
-                            remainingCooldown--;
-
-                            var minSecs = getRemainingTime(remainingCooldown);
-
-                            submitContainer.html(`<b>${minSecs.minutes} minutes ${minSecs.seconds} seconds until you can play again</b>`);
-                            if(remainingCooldown <= 0)
-                            {
-                                clearInterval(downloadTimer);
-                                location.reload();
-                            }
-                        },1000);
+                        
+                        startCountdown(submitContainer, remainingCooldown);
                     }
                     else
                         submitContainer.removeClass("hidden");
+                });
+
+                $("#submit").click(() => {
+                    $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
+                        $("#success").html(`${info.payPerClick} Ark added to your account!`);
+                        $("#success").removeClass("hidden");
+                        startCountdown(submitContainer, info.cooldown);
+                    }).fail((resp) => {
+                        $("#error").html(resp.responseText);
+                        $("#error").removeClass("hidden");
+                    });
                 });
             });
 
