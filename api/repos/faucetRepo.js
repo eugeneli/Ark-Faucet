@@ -28,6 +28,25 @@ exports.getAllUnpaidBalances = () => {
     });
 };
 
+exports.sumUnpaidBalance = () => {
+    return new Promise((resolve, reject) => {
+        getConnection().then((con) => {
+            con.query("SELECT SUM(pending) FROM Unpaid_Balances", function(err, rows) {
+                con.release();
+                if(!err)
+                {
+                    var sum = parseFloat(rows["SUM(pending)"]);
+                    if(isNaN(sum))
+                        resolve({sum: 0});
+                    else
+                        resolve({sum: sum});
+                }
+                reject(err);
+            });
+        });
+    });
+};
+
 exports.updateUnpaidBalance = (address, payPerClick) => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
@@ -45,52 +64,6 @@ exports.updateUnpaidBalance = (address, payPerClick) => {
                     reject(err);
                 }
             });
-
-
-/*
-            con.query("SELECT * FROM Unpaid_Balances WHERE address = ?", address, (err, rows) => {
-                if(!err && rows.length > 0) //If there is already a pending balance, update it
-                {
-                    var currentPending = new BigNumber(parseFloat(rows[0].pending));
-                    var totalUnpaid = currentUnpaid.plus(payPerClick);
-
-                    //Store new balance in db
-                    con.query("UPDATE Unpaid_Balances SET pending = ? WHERE address = ?", [totalUnpaid.toString(), address], (err, rows) => {
-                        con.release();
-                        if(!err)
-                            resolve();
-                        else
-                        {
-                            console.log("Couldn't update unpaid balances row. " + address + " " + totalUnpaid.toString());
-                            reject(err);
-                        }
-                    });
-                }
-                else if(!err) //Create new pending balance
-                {
-                    var unpaidBal = {
-                        address: address,
-                        pending: payPerClick.toString()
-                    };
-                    con.query("INSERT INTO Unpaid_Balances set ?", unpaidBal, (err, rows) => {
-                        con.release();
-                        if(!err)
-                            resolve();
-                        else
-                        {
-                            console.log("Couldn't insert new unpaid balances row. " + unpaidBal.address + " " + unpaidBal.pending);
-                            reject(err);
-                        }
-                    });
-                }
-                else
-                {
-                    con.release();
-                    console.log(err);
-                    reject(err);
-                }
-            });
-*/
         });
     });
 };

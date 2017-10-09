@@ -15,10 +15,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.disable("x-powered-by");
 
 nconf.argv().file("config.json");
-const PORT = nconf.get("port");
-const PAY_PER_CLICK = nconf.get("payPerClick");
-const COOLDOWN = nconf.get("cooldown");
+PAY_PER_CLICK = nconf.get("payPerClick");
+COOLDOWN = nconf.get("cooldown");
 
+const PORT = nconf.get("port");
 const DB_USERNAME = nconf.get("database:username");
 const DB_PASSWORD = nconf.get("database:password");
 const PASSPHRASE = nconf.argv().get("pass");
@@ -30,6 +30,9 @@ if(!PASSPHRASE)
 }
 
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
+
+const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
+FAUCET_ADDR = ark.crypto.getAddress(PUB_KEY);
 
 arkApi.setPreferredNode(nconf.get("node"));
 arkApi.init("main");
@@ -57,14 +60,11 @@ exports.getConnection = () => {
 
 var getFaucetAccountInfo = () => {
     return new Promise((resolve, reject) => {
-        let pubKey = ark.crypto.getKeys(PASSPHRASE).publicKey;
-        let faucetAddr = ark.crypto.getAddress(pubKey);
-
-        arkApi.getBalance(faucetAddr, (err, succ, resp) => {
+        arkApi.getBalance(FAUCET_ADDR, (err, succ, resp) => {
             if(!err)
             {
                 var info = {
-                    address: faucetAddr,
+                    address: FAUCET_ADDR,
                     balance: resp.balance / 100000000,
                 };
 
