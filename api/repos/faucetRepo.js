@@ -1,11 +1,10 @@
 "use strict";
 var getConnection = require("../../server").getConnection;
-var faucetRepo = require("../repos/faucetRepo");
 
 exports.getUnpaidBalanceByAddress = (address) => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            con.query("SELECT * FROM Unpaid_Balances WHERE address = ?", [address], function(err, rows) {
+            con.query("SELECT * FROM ArkFaucet.Unpaid_Balances WHERE address = ?", [address], function(err, rows) {
                 con.release();
                 if(!err)
                     resolve(rows);
@@ -18,7 +17,7 @@ exports.getUnpaidBalanceByAddress = (address) => {
 exports.getAllUnpaidBalances = () => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            con.query("SELECT * FROM Unpaid_Balances", function(err, rows) {
+            con.query("SELECT * FROM ArkFaucet.Unpaid_Balances", function(err, rows) {
                 con.release();
                 if(!err)
                     resolve(rows);
@@ -31,7 +30,7 @@ exports.getAllUnpaidBalances = () => {
 exports.sumUnpaidBalance = () => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            con.query("SELECT SUM(pending) FROM Unpaid_Balances", function(err, rows) {
+            con.query("SELECT SUM(pending) FROM ArkFaucet.Unpaid_Balances", function(err, rows) {
                 con.release();
                 if(!err)
                 {
@@ -54,7 +53,7 @@ exports.updateUnpaidBalance = (address, payPerClick) => {
                 address: address,
                 pending: payPerClick.toString()
             };
-            con.query("INSERT INTO Unpaid_Balances set ? ON DUPLICATE KEY UPDATE pending = pending + ?", [unpaidBal, payPerClick], (err, rows) => {
+            con.query("INSERT INTO ArkFaucet.Unpaid_Balances set ? ON DUPLICATE KEY UPDATE pending = pending + ?", [unpaidBal, payPerClick], (err, rows) => {
                 con.release();
                 if(!err)
                     resolve();
@@ -71,7 +70,7 @@ exports.updateUnpaidBalance = (address, payPerClick) => {
 exports.getRollTimeByIp = (ip) => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            con.query("SELECT * FROM Roll_Times WHERE IP = ?", [ip], function(err, rows) {
+            con.query("SELECT * FROM ArkFaucet.Roll_Times WHERE IP = ?", [ip], function(err, rows) {
                 con.release();
                 if(!err)
                     resolve(rows);
@@ -84,7 +83,7 @@ exports.getRollTimeByIp = (ip) => {
 exports.getAllRollTimes = () => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            con.query("SELECT * FROM Roll_Times", function(err, rows) {
+            con.query("SELECT * FROM ArkFaucet.Roll_Times", function(err, rows) {
                 con.release();
                 if(!err)
                     resolve(rows);
@@ -101,7 +100,7 @@ exports.updateRollTime = (IP, rollTime) => {
                 IP: IP,
                 lastRoll: rollTime
             };
-            con.query("INSERT INTO Roll_Times set ? ON DUPLICATE KEY UPDATE lastRoll = ?", [unpaidBal, rollTime], (err, rows) => {
+            con.query("INSERT INTO ArkFaucet.Roll_Times set ? ON DUPLICATE KEY UPDATE lastRoll = ?", [unpaidBal, rollTime], (err, rows) => {
                 con.release();
                 if(!err)
                     resolve();

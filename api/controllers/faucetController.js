@@ -1,8 +1,21 @@
 "use strict";
 var repo = require("../repos/faucetRepo");
+var logRepo = require("../repos/logRepo");
 var arkApi = require("ark-api");
 var moment = require("moment");
 var util = require("../util");
+
+var createLog = (IP, address, amount, rollTime) => {
+    var log = {
+        IP: IP,
+        address: address,
+        amount: amount,
+        rollTime: rollTime
+    };
+
+    console.log(`[${rollTime}] ${address} (${IP}) +${PAY_PER_CLICK} ARK`);
+    return log;
+};
 
 exports.useFaucet = (req, res) => {
     recaptcha.verify(req, (err, data) => {
@@ -34,6 +47,7 @@ exports.useFaucet = (req, res) => {
                         }
 
                         //Make sure we don't become insolvent
+                        //faucetBalance = 10000;
                         if(totalUnpaid + PAY_PER_CLICK >= faucetBalance)
                             return util.reject(res, "403", "Faucet is empty, please check back later");
 
@@ -41,7 +55,7 @@ exports.useFaucet = (req, res) => {
                         var updatePendingP = repo.updateUnpaidBalance(address, PAY_PER_CLICK);
                         var updateRollTimeP = repo.updateRollTime(IP, now.toDate());
 
-                        console.log(`Crediting ${address} (${IP}) with ${PAY_PER_CLICK} ARK`);
+                        logRepo.addLog(createLog(IP, address, PAY_PER_CLICK, now.toDate()));
                         Promise.all([updatePendingP, updateRollTimeP]).then(() => {
                             return res.send({
                                 rollTime: now.toDate()
@@ -52,8 +66,6 @@ exports.useFaucet = (req, res) => {
                 else
                     reject(err);
             });
-
-            //repo.updateUnpaidBalance()
         }
         else
             util.reject(res, "403", "reCaptcha verification failed");
