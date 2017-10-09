@@ -6,6 +6,7 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser")
 var mysql = require("mysql");
 var nconf = require("nconf");
+var payout = require("./payout");
 var Recaptcha = require("express-recaptcha");
 var app = express();
 app.use(express.static("./frontend"));
@@ -22,6 +23,16 @@ const PORT = nconf.get("port");
 const DB_USERNAME = nconf.get("database:username");
 const DB_PASSWORD = nconf.get("database:password");
 const PASSPHRASE = nconf.argv().get("pass");
+const SECOND_PASS = nconf.argv().get("secPass");
+
+process.on(
+    "unhandledRejection",
+    function handleWarning( reason, promise ) {
+
+        console.log( reason );
+
+    }
+);
 
 if(!PASSPHRASE)
 {
@@ -47,7 +58,7 @@ var pool = mysql.createPool({
     debug:  false
 });
 
-exports.getConnection = () => {
+getConnection = () => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if(err)
@@ -101,6 +112,14 @@ var startServer = () => {
             console.log(`Cooldown: ${COOLDOWN} seconds`);
             console.log("=====");
         });
+
+        //Start payout scheduler
+        const MINIMUM_THRESHOLD = nconf.get("payMinimum");
+        const FREQUENCY = nconf.get("paySchedule");
+        const TX_FEE = nconf.get("txFee");
+
+        payout.startScheduler(MINIMUM_THRESHOLD, TX_FEE, FREQUENCY, PASSPHRASE, SECOND_PASS);
+
     });
 }
 

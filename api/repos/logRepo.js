@@ -1,5 +1,4 @@
 "use strict";
-var getConnection = require("../../server").getConnection;
 
 exports.getAllLogs = () => {
     return new Promise((resolve, reject) => {

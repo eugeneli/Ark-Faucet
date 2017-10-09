@@ -1,5 +1,4 @@
 "use strict";
-var getConnection = require("../../server").getConnection;
 
 exports.getUnpaidBalanceByAddress = (address) => {
     return new Promise((resolve, reject) => {
@@ -65,6 +64,34 @@ exports.updateUnpaidBalance = (address, payPerClick) => {
             });
         });
     });
+};
+
+exports.getOverthresholdBalances = (threshold) => {
+    return new Promise((resolve, reject) => {
+        getConnection().then((con) => {
+            con.query("SELECT * FROM ArkFaucet.Unpaid_Balances WHERE pending >= ?", threshold, function(err, rows) {
+                con.release();
+                if(!err)
+                    resolve(rows);
+                reject(err);
+            });
+        });
+    });
+};
+
+exports.deleteUnpaidBalances = (addrs) => {
+    var joinedAddrs = addrs.map((addr) => `'${addr}'`).join(",");
+    var query = "DELETE FROM ArkFaucet.Unpaid_Balances WHERE address in (";
+    query += joinedAddrs + ")";
+
+    getConnection().then((con) => {
+        con.query(query, function(err, rows) {
+            con.release();
+            if(!err)
+                resolve(rows);
+            reject(err);
+        });
+    });    
 };
 
 exports.getRollTimeByIp = (ip) => {

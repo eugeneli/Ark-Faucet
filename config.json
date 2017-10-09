@@ -3,9 +3,12 @@
     "port": 80,
     "payPerClick": 0.05,
     "cooldown": 3600,
+    "paySchedule": "0 01 0 * * *",
+    "payMinimum": 1.0,
+    "txFee": 0.1,
     "database": {
-        "username": "user",
-        "password": "pass"
+        "username": "arkfaucet",
+        "password": "test"
     },
     "recaptcha": {
         "siteKey": "",
