@@ -4,8 +4,9 @@
     "payPerClick": 0.05,
     "cooldown": 3600,
     "paySchedule": "0 01 0 * * *",
-    "payMinimum": 1.0,
+    "payMinimum": 1.1,
     "txFee": 0.1,
+    "log": "tx.log",
     "database": {
         "username": "arkfaucet",
         "password": "test"

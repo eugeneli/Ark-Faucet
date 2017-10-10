@@ -19,20 +19,13 @@ nconf.argv().file("config.json");
 PAY_PER_CLICK = nconf.get("payPerClick");
 COOLDOWN = nconf.get("cooldown");
 
+LOG_FILE = nconf.get("log");
+
 const PORT = nconf.get("port");
 const DB_USERNAME = nconf.get("database:username");
 const DB_PASSWORD = nconf.get("database:password");
 const PASSPHRASE = nconf.argv().get("pass");
 const SECOND_PASS = nconf.argv().get("secPass");
-
-process.on(
-    "unhandledRejection",
-    function handleWarning( reason, promise ) {
-
-        console.log( reason );
-
-    }
-);
 
 if(!PASSPHRASE)
 {

@@ -87,9 +87,6 @@ exports.deleteUnpaidBalances = (addrs) => {
     getConnection().then((con) => {
         con.query(query, function(err, rows) {
             con.release();
-            if(!err)
-                resolve(rows);
-            reject(err);
         });
     });    
 };
