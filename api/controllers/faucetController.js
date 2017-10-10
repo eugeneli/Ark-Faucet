@@ -44,12 +44,15 @@ exports.useFaucet = (req, res) => {
                         var totalUnpaid = resp[0].sum;
                         var rollTimeRow = resp[1];
 
-                        var timeDifference = timeDiff(now, moment(rollTimeRow[0].lastRoll), COOLDOWN);
+                        var timeDifference = { canRoll:true, diff: 0 };
 
                         //Check if cooldown is up
                         if(rollTimeRow.length > 0)
+                        {
+                            timeDifference = timeDiff(now, moment(rollTimeRow[0].lastRoll), COOLDOWN);
                             if(!timeDifference.canRoll)
                                 return util.reject(res, "403", "Try again later");
+                        }
 
                         //Make sure we don't become insolvent
                         //faucetBalance = 10000;

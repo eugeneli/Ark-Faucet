@@ -5,8 +5,12 @@ var alphanumRegex = /^[a-z0-9]+$/i;
 
 exports.reject = (res, status, msg) => {
     console.log(`Rejected: ${status} - ${msg}`);
+    var resp = {
+        success: false,
+        message: msg
+    }
     res.status(status);
-    res.send(msg);
+    res.send(resp);
 }
 
 exports.isAddress = (addr) => {

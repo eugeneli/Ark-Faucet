@@ -3,16 +3,9 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-        <link href="index.css" rel="stylesheet">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script>
-            var addr;
-            var captchaResp;
-            var onCaptchaSolve = (resp) => {
-                addr = $("#address").val();
-                captchaResp = resp;
-            }
-        </script>
+        <link href="index.css" rel="stylesheet">
+        <script src="index.js"></script>
     </head>
     <body>
         <nav class="navbar navbar-default" id="header">
@@ -52,85 +45,5 @@
                 </div>
             </div>
         </div>
-        <script type="text/javascript">
-            var getRemainingTime = (seconds) => {
-                var minutes = Math.floor(seconds / 60);
-                var seconds = seconds - (minutes * 60);
-
-                return { minutes: minutes, seconds: seconds };
-            }
-
-            var startCountdown = (container, remainingCooldown) => {
-                var cooldownTimer = setInterval(() => {
-                    remainingCooldown--;
-
-                    var minSecs = getRemainingTime(remainingCooldown);
-
-                    container.html(`<b>${minSecs.minutes} minutes ${minSecs.seconds} seconds until you can play again</b>`);
-                    if(remainingCooldown <= 0)
-                    {
-                        clearInterval(cooldownTimer);
-                        //location.reload();
-                    }
-                }, 1000);
-            }
-
-            var submitContainer = $("#submitContainer");
-            var success = $("#success");
-            var error = $("#error");
-            var captcha = $("#captcha");
-
-            $.get("api/faucet", (info) => {
-                $("#addr").html(info.address);
-                $("#ppc").html(info.payPerClick.toFixed(8) + " ARK");
-                $("#cooldown").html(info.cooldown + " seconds");
-
-                $.get("api/faucet/status", (data) => {
-                    if(!data.canRoll)
-                    {
-                        var timeDiff = data.timeDiff;
-                        var remainingCooldown = info.cooldown - timeDiff;
-
-                        submitContainer.removeClass("hidden");
-                        submitContainer.empty();
-                        
-                        startCountdown(submitContainer, remainingCooldown);
-                    }
-                    else
-                        submitContainer.removeClass("hidden");
-                });
-
-                $("#submit").click(() => {
-                    if(addr == null || captchaResp == null)
-                    {
-                        error.html("Please enter a valid Ark address and solve the captcha");
-                        error.removeClass("hidden");
-                    }
-
-                    $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
-                        success.html(`${info.payPerClick} Ark added to your account!`);
-                        success.removeClass("hidden");
-                        startCountdown(submitContainer, info.cooldown);
-                    }).fail((resp) => {
-                        error.html(resp.responseText);
-                        error.removeClass("hidden");
-                    });
-                });
-            });
-
-            $.get("api/faucet/captcha", (resp) => {
-                var captchaHtml = $(resp.captcha);
-                var element = captchaHtml.find("div.g-recaptcha");
-                element.data("callback", "onCaptchaSolve");
-
-                console.log(element);
-
-                captcha.html(captchaHtml);
-            });
-
-            $.get("api/faucet/logs", (data) => {
-                console.log(data);
-            });
-        </script>
     </body>
 </html>
