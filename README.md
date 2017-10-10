@@ -50,7 +50,7 @@ First, remember to prepare your MySQL database as mentioned above and insert you
 #### Command line usage:
 `node server --pass "Your Faucet Passphrase"`
 
-Optionally, you can also put in your second passphrase, if applicable:  `node server --pass "Your Faucet Passphrase" --secPass "Your Faucet Multisig"`
+If applicable, you can also put in your second passphrase:  `node server --pass "Your Faucet Passphrase" --secPass "Your Faucet Multisig"`
 
 Note: You will need to run as root if you want the web server to listen on port `80`
 
