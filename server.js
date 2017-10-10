@@ -94,7 +94,7 @@ var startServer = () => {
             next();
     });
 
-    app.listen(PORT, "127.0.0.1", () => {
+    app.listen(PORT, () => {
         console.log(fs.readFileSync("art.txt", "utf8"));
         console.log(`Faucet server started on port ${PORT}`);
         getFaucetAccountInfo().then((info) => {
