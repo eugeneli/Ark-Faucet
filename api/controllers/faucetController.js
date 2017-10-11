@@ -55,9 +55,8 @@ exports.useFaucet = (req, res) => {
                         }
 
                         //Make sure we don't become insolvent
-                        //faucetBalance = 10000;
-                        //if(totalUnpaid + PAY_PER_CLICK >= faucetBalance)
-                            //return util.reject(res, "403", "Faucet is empty, please check back later");
+                        if(totalUnpaid + PAY_PER_CLICK >= faucetBalance)
+                            return util.reject(res, "403", "Faucet is empty, please check back later");
 
                         //Checks passed, credit them now
                         var updatePendingP = repo.updateUnpaidBalance(address, PAY_PER_CLICK);
