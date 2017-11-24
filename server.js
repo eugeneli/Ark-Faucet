@@ -35,11 +35,12 @@ if(!PASSPHRASE)
 
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
 
+ark.crypto.setNetworkVersion(30);
 const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
 FAUCET_ADDR = ark.crypto.getAddress(PUB_KEY);
 
-arkApi.setPreferredNode(nconf.get("node"));
-arkApi.init("main");
+arkApi.setPreferredNode(nconf.get("node"), false);
+arkApi.init("dev");
 
 //Init MySQL
 var pool = mysql.createPool({
