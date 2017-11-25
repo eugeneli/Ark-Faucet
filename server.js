@@ -101,8 +101,8 @@ var startServer = () => {
         getFaucetAccountInfo().then((info) => {
             console.log("=====");
             console.log(`Address: ${info.address}`);
-            console.log(`Balance: ${info.balance} ARK`);
-            console.log(`Pay Per Click: ${PAY_PER_CLICK} ARK`);
+            console.log(`Balance: ${info.balance} DARK`);
+            console.log(`Pay Per Click: ${PAY_PER_CLICK} DARK`);
             console.log(`Cooldown: ${COOLDOWN} seconds`);
             console.log("=====");
         });
