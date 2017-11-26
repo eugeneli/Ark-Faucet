@@ -9,7 +9,7 @@ var nconf = require("nconf");
 var payout = require("./payout");
 var Recaptcha = require("express-recaptcha");
 var app = express();
-app.use(express.static("./frontend"));
+app.use('/faucet', express.static("./frontend"));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
