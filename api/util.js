@@ -15,7 +15,7 @@ exports.reject = (res, status, msg) => {
 }
 
 exports.isAddress = (addr) => {
-    return alphanumRegex.test(addr) && addr.length == 34 && addr.charAt(0) == 'K';
+    return alphanumRegex.test(addr) && addr.length == 34 && addr.charAt(0) == 'D';
 };
 
 exports.log = (msg, async) => {
