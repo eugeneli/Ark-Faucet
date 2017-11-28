@@ -36,7 +36,7 @@ $(document).ready(function() {
 
     $.get("api/faucet", (info) => {
         $("#addr").html(info.address);
-        $("#ppc").html(info.payPerClick.toFixed(8) + " ARK");
+        $("#ppc").html(info.payPerClick.toFixed(8) + " DARK");
         $("#cooldown").html(info.cooldown + " seconds");
 
         $.get("api/faucet/status", (data) => {
@@ -57,14 +57,14 @@ $(document).ready(function() {
         $("#submit").click(() => {
             if(addr == null || captchaResp == null)
             {
-                error.html("Please enter a valid Ark address and solve the captcha");
+                error.html("Please enter a valid Dark address and solve the captcha");
                 error.removeClass("hidden");
                 return;
             }
 
             $.post("api/faucet", {"address": addr, "g-recaptcha-response": captchaResp}, (resp) => {
                 error.addClass("hidden");
-                success.html(`${info.payPerClick} Ark added to your account!`);
+                success.html(`${info.payPerClick} Dark added to your account!`);
                 success.removeClass("hidden");
                 startCountdown(submitContainer, info.cooldown);
             }).fail((resp) => {

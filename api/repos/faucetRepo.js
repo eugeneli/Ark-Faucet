@@ -104,6 +104,19 @@ exports.getRollTimeByIp = (ip) => {
     });
 };
 
+exports.getRollTimeByAddress = (address) => {
+    return new Promise((resolve, reject) => {
+        getConnection().then((con) => {
+            con.query("SELECT * FROM ArkFaucet.Roll_Times WHERE address = ?", [address], function(err, rows) {
+                con.release();
+                if(!err)
+                    resolve(rows);
+                reject(err);
+            });
+        });
+    });
+};
+
 exports.getAllRollTimes = () => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {

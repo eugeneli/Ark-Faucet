@@ -35,11 +35,12 @@ if(!PASSPHRASE)
 
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
 
+ark.crypto.setNetworkVersion(30);
 const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
 FAUCET_ADDR = ark.crypto.getAddress(PUB_KEY);
 
-arkApi.setPreferredNode(nconf.get("node"));
-arkApi.init("main");
+arkApi.setPreferredNode(nconf.get("node"), false);
+arkApi.init("dev");
 
 //Init MySQL
 var pool = mysql.createPool({
@@ -100,8 +101,8 @@ var startServer = () => {
         getFaucetAccountInfo().then((info) => {
             console.log("=====");
             console.log(`Address: ${info.address}`);
-            console.log(`Balance: ${info.balance} ARK`);
-            console.log(`Pay Per Click: ${PAY_PER_CLICK} ARK`);
+            console.log(`Balance: ${info.balance} DARK`);
+            console.log(`Pay Per Click: ${PAY_PER_CLICK} DARK`);
             console.log(`Cooldown: ${COOLDOWN} seconds`);
             console.log("=====");
         });
