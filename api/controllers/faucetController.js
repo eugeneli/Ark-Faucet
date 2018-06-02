@@ -52,7 +52,7 @@ exports.useFaucet = (req, res) => {
         //Check if address was already rolled for recently
         if(addrRollRow.length > 0)
         {
-            const timeDifference = timeDiff(now, moment(addrRollRow[0].lastRoll), COOLDOWN);
+            timeDifference = timeDiff(now, moment(addrRollRow[0].lastRoll), COOLDOWN);
             if(!timeDifference.canRoll)
                 return util.reject(res, "403", "Try again later");
         }
