@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `ArkFaucet`.`Unpaid_Balances` (
 CREATE TABLE IF NOT EXISTS `ArkFaucet`.`Roll_Times` (
   `IP` VARCHAR(22) NOT NULL,
   `lastRoll` DATETIME,
+  `address` VARCHAR(34) NOT NULL,
   PRIMARY KEY (`IP`));
 
 CREATE TABLE IF NOT EXISTS `ArkFaucet`.`Logs` (

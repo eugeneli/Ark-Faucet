@@ -1,12 +1,31 @@
 "use strict";
-var BigNumber = require("bignumber.js");
-var fs = require("fs");
+const BigNumber = require("bignumber.js");
+const fs = require("fs");
+const arkApi = require("ark-api");
 
-var alphanumRegex = /^[a-z0-9]+$/i;
+const addrRegex = /^A[a-z0-9A-Z]{33}$/;
+
+exports.getFaucetAccountInfo = () => {
+    return new Promise((resolve, reject) => {
+        arkApi.getBalance(FAUCET_ADDR, (err, succ, resp) => {
+            if(!err)
+            {
+                const info = {
+                    address: FAUCET_ADDR,
+                    balance: resp.balance / 100000000,
+                };
+
+                resolve(info);
+            }
+            else
+                reject(err);
+        });
+    });
+};
 
 exports.reject = (res, status, msg) => {
     console.log(`Rejected: ${status} - ${msg}`);
-    var resp = {
+    const resp = {
         success: false,
         message: msg
     }
@@ -15,12 +34,12 @@ exports.reject = (res, status, msg) => {
 }
 
 exports.isAddress = (addr) => {
-    return alphanumRegex.test(addr) && addr.length == 34 && addr.charAt(0) == 'A';
+    return addrRegex.test(addr);
 };
 
-exports.log = (msg, async) => {
+exports.log = (msg, doAsync) => {
     console.log(msg);
-    if(async)
+    if(doAsync)
         fs.appendFile(LOG_FILE, msg);
     else
         fs.appendFileSync(LOG_FILE, msg);

@@ -1,14 +1,15 @@
-var fs = require("fs");
-var arkApi = require("ark-api");
-var ark = require("arkjs");
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser")
-var mysql = require("mysql");
-var nconf = require("nconf");
-var payout = require("./payout");
-var Recaptcha = require("express-recaptcha");
-var app = express();
+const fs = require("fs");
+const arkApi = require("ark-api");
+const ark = require("arkjs");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser")
+const mysql = require("mysql");
+const nconf = require("nconf");
+const util = require("./api/util");
+const payout = require("./payout");
+const Recaptcha = require("express-recaptcha");
+const app = express();
 app.use(express.static("./frontend"));
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -33,16 +34,16 @@ if(!PASSPHRASE)
     process.exit(1);
 }
 
+arkApi.setPreferredNode(nconf.get("node"));
+arkApi.init("main");
+
 recaptcha = new Recaptcha(nconf.get("recaptcha:siteKey"), nconf.get("recaptcha:secretKey"));
 
 const PUB_KEY = ark.crypto.getKeys(PASSPHRASE).publicKey;
 FAUCET_ADDR = ark.crypto.getAddress(PUB_KEY);
 
-arkApi.setPreferredNode(nconf.get("node"));
-arkApi.init("main");
-
 //Init MySQL
-var pool = mysql.createPool({
+const pool = mysql.createPool({
     connectionLimit : 100,
     host: "localhost",
     user: DB_USERNAME,
@@ -62,26 +63,8 @@ getConnection = () => {
     }).catch((err) => console.log(err));
 };
 
-var getFaucetAccountInfo = () => {
-    return new Promise((resolve, reject) => {
-        arkApi.getBalance(FAUCET_ADDR, (err, succ, resp) => {
-            if(!err)
-            {
-                var info = {
-                    address: FAUCET_ADDR,
-                    balance: resp.balance / 100000000,
-                };
-
-                resolve(info);
-            }
-            else
-                reject(err);
-        });
-    });
-};
-
-var startServer = () => {
-    var routes = require("./api/routes/routes");
+const startServer = () => {
+    const routes = require("./api/routes/routes");
     routes(app);
 
     app.all("/*", (req, res, next) => {
@@ -94,17 +77,18 @@ var startServer = () => {
             next();
     });
 
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
         console.log(fs.readFileSync("art.txt", "utf8"));
         console.log(`Faucet server started on port ${PORT}`);
-        getFaucetAccountInfo().then((info) => {
-            console.log("=====");
-            console.log(`Address: ${info.address}`);
-            console.log(`Balance: ${info.balance} ARK`);
-            console.log(`Pay Per Click: ${PAY_PER_CLICK} ARK`);
-            console.log(`Cooldown: ${COOLDOWN} seconds`);
-            console.log("=====");
-        });
+
+        const info = await util.getFaucetAccountInfo();
+
+        console.log("=====");
+        console.log(`Address: ${info.address}`);
+        console.log(`Balance: ${info.balance} ARK`);
+        console.log(`Pay Per Click: ${PAY_PER_CLICK} ARK`);
+        console.log(`Cooldown: ${COOLDOWN} seconds`);
+        console.log("=====");
 
         //Start payout scheduler
         const MINIMUM_THRESHOLD = nconf.get("payMinimum");

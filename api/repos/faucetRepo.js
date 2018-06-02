@@ -33,7 +33,7 @@ exports.sumUnpaidBalance = () => {
                 con.release();
                 if(!err)
                 {
-                    var sum = parseFloat(rows["SUM(pending)"]);
+                    const sum = parseFloat(rows["SUM(pending)"]);
                     if(isNaN(sum))
                         resolve({sum: 0});
                     else
@@ -48,7 +48,7 @@ exports.sumUnpaidBalance = () => {
 exports.updateUnpaidBalance = (address, payPerClick) => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
-            var unpaidBal = {
+            const unpaidBal = {
                 address: address,
                 pending: payPerClick.toString()
             };
@@ -80,8 +80,8 @@ exports.getOverthresholdBalances = (threshold) => {
 };
 
 exports.deleteUnpaidBalances = (addrs) => {
-    var joinedAddrs = addrs.map((addr) => `'${addr}'`).join(",");
-    var query = "DELETE FROM ArkFaucet.Unpaid_Balances WHERE address in (";
+    const joinedAddrs = addrs.map((addr) => `'${addr}'`).join(",");
+    let query = "DELETE FROM ArkFaucet.Unpaid_Balances WHERE address in (";
     query += joinedAddrs + ")";
 
     getConnection().then((con) => {
@@ -104,6 +104,19 @@ exports.getRollTimeByIp = (ip) => {
     });
 };
 
+exports.getRollTimeByAddress = (address) => {
+    return new Promise((resolve, reject) => {
+        getConnection().then((con) => {
+            con.query("SELECT * FROM ArkFaucet.Roll_Times WHERE address = ? order by lastRoll DESC", [address], function(err, rows) {
+                con.release();
+                if(!err)
+                    resolve(rows);
+                reject(err);
+            });
+        });
+    });
+};
+
 exports.getAllRollTimes = () => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
@@ -117,14 +130,15 @@ exports.getAllRollTimes = () => {
     });
 };
 
-exports.updateRollTime = (IP, rollTime) => {
+exports.updateRollTime = (IP, rollTime, address) => {
     return new Promise((resolve, reject) => {
         getConnection().then((con) => {
             var unpaidBal = {
                 IP: IP,
-                lastRoll: rollTime
+                lastRoll: rollTime,
+                address: address
             };
-            con.query("INSERT INTO ArkFaucet.Roll_Times set ? ON DUPLICATE KEY UPDATE lastRoll = ?", [unpaidBal, rollTime], (err, rows) => {
+            con.query("INSERT INTO ArkFaucet.Roll_Times set ? ON DUPLICATE KEY UPDATE lastRoll = ?, address = ?", [unpaidBal, rollTime, address], (err, rows) => {
                 con.release();
                 if(!err)
                     resolve();
