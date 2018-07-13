@@ -2,6 +2,12 @@
 
 This is a full front/backend implementation of a cryptocurrency faucet for Ark written in Node using the Express framework.
 
+# Introduction
+
+<p align="center">
+    <a href="https://arkcommunity.fund/"><img src="https://arkcommunity.fund/media-kit/funded/banner.png" /></a>
+</p>
+
 ## Getting Started
 
 First and foremost, you will need a MySQL server installed. Once the database server is running, create the ArkFaucet tables by running `db.sql` located inside the `DataModel` directory.
